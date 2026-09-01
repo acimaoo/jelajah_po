@@ -67,6 +67,9 @@ app.put('/wisata/:id_wisata', (req, res) => {
     const sql = 'UPDATE wisata SET nama_wisata = ?, deskripsi = ?, harga_tiket = ?, id_kategori = ? WHERE id_wisata = ?';
     db.query(sql, [nama_wisata, deskripsi, harga_tiket, id_kategori, id_wisata], (err, result) => {
         if (err) return res.status(500).json({ error: err.sqlMessage });
+        if (result.affectedRows === 0) {
+            return res.status(404).json({ message: 'Wisata tidak ditemukan!' });
+        }
         res.json({ message: 'Wisata berhasil diupdate!' });
     });
 });
@@ -77,9 +80,12 @@ app.delete('/wisata/:id_wisata', (req, res) => {
     const sql = 'DELETE FROM wisata WHERE id_wisata = ?';
     db.query(sql, [id_wisata], (err, result) => {
         if (err) return res.status(500).json({ error: err.sqlMessage });
-        res.json({ message: 'Wisata berhasil dihapus!' })
-    })
-})
+        if (result.affectedRows === 0) {
+            return res.status(404).json({ message: 'Wisata tidak ditemukan!' });
+        }
+        res.json({ message: 'Wisata berhasil dihapus!' });
+    });
+});
 
 ////////////////////// GET KATEGORI ////////////////////////
 app.get('/kategori', (req, res) => {
