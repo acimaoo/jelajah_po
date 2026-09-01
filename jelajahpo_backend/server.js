@@ -1,7 +1,9 @@
 const express = require('express');
+const cors = require('cors');
 const app = express();
 const PORT = 3001;
 
+app.use(cors());
 app.use(express.json());
 
 const mysql = require('mysql2');
@@ -22,18 +24,36 @@ db.connect(err => {
 
 //////////////////////// GET WISATA ////////////////////////
 app.get('/wisata', (req, res) => {
-    const sql = 'SELECT * FROM wisata' ;
+    const sql = 'SELECT * FROM wisata';
     db.query(sql, (err, results) => {
-        if (err) return res.status(500).json({ error: err});
+        if (err) return res.status(500).json({ error: err });
         res.json(results);
     });
 });
 
-////////////////////// GET KATEGROI ///////////////////////
+////////////////////// POST WISATA /////////////////////////
+app.post('/wisata', (req, res) => {
+    const { nama_wisata, deskripsi, harga_tiket, id_kategori } = req.body;
+
+    if (!nama_wisata || !harga_tiket) {
+        return res.status(400).json({ message: 'Nama WIsata dan HArga Tiket Wajib DIisi' });
+    }
+
+    const sql = 'INSERT INTO wisata (nama_wisata, deskripsi, harga_tiket, id_kategori, tgl_input ) VALUES (?, ?, ?, ?, NOW())';
+    db.query(sql, [nama_wisata, deskripsi, harga_tiket, id_kategori], (err, result) => {
+        if (err) return res.status(500).json({ error: err.sqlMessage });
+        res.json({
+            message: 'WIsata berhasil ditambahkan',
+            id_wisata: result.insertId
+        });
+    });
+});
+
+////////////////////// GET KATEGROI ////////////////////////
 app.get('/kategori', (req, res) => {
-    const sql = 'SELECT * FROM kategori' ;
+    const sql = 'SELECT * FROM kategori';
     db.query(sql, (err, results) => {
-        if (err) return res.status(500).json({ error: err});
+        if (err) return res.status(500).json({ error: err });
         res.json(results);
     });
 });
