@@ -84,9 +84,10 @@ app.post('/wisata', upload.single('file'), (req, res) => {
 });
 
 //////////////////////// PUT WISATA /////////////////////////
-app.put('/wisata/:id_wisata', authJWT, (req, res) => {
+app.put('/wisata/:id_wisata', authJWT, upload.single('file'),(req, res) => {
     const { id_wisata } = req.params;
     const { nama_wisata, deskripsi, harga_tiket, id_kategori } = req.body;
+    const nama_file = req.file ? req.file.filename : null;
 
     if (!nama_wisata || !harga_tiket) {
         return res.status(400).json({ message: 'Nama Wisata dan Harga Tiket Wajib Diisi!!' });
@@ -95,8 +96,8 @@ app.put('/wisata/:id_wisata', authJWT, (req, res) => {
         return res.status(400).json({ message: 'Deskripsi Wajib Diisi!!' });
     }
 
-    const sql = 'UPDATE wisata SET nama_wisata = ?, deskripsi = ?, harga_tiket = ?, id_kategori = ? WHERE id_wisata = ?';
-    db.query(sql, [nama_wisata, deskripsi, harga_tiket, id_kategori, id_wisata], (err, result) => {
+    const sql = 'UPDATE wisata SET nama_wisata = ?, deskripsi = ?, harga_tiket = ?, nama_file = COALESCE(?, nama_file),id_kategori = ? WHERE id_wisata = ?';
+    db.query(sql, [nama_wisata, deskripsi, harga_tiket, nama_file, id_kategori, id_wisata], (err, result) => {
         if (err) return res.status(500).json({ error: err.sqlMessage });
         if (result.affectedRows === 0) {
             return res.status(404).json({ message: 'Wisata tidak ditemukan!' });
