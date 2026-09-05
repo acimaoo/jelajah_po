@@ -26,6 +26,9 @@ export default function Wisata() {
             try {
                 const res = await fetch(`http://localhost:5000/wisata/${id}`, {
                     method: "DELETE",
+                    headers: {
+                        Authorization: `Bearer ${localStorage.getItem("token")}`,
+                    },
                 });
                 if (res.ok) {
                     alert("Wisata berhasil dihapus");
@@ -74,18 +77,18 @@ export default function Wisata() {
                                 <td>{item.nama_wisata}</td>
                                 <td>{item.deskripsi}</td>
                                 <td>Rp {item.harga_tiket.toLocaleString()}</td>
-                                <td> 
+                                <td>
                                     <button
-                                    className="btn btn-warning btn-sm me-2"
-                                    onClick={() => handleEdit(item.id_wisata)}>
-                                    Edit
+                                        className="btn btn-warning btn-sm me-2"
+                                        onClick={() => handleEdit(item.id_wisata)}>
+                                        Edit
                                     </button>
                                 </td>
-                                <td> 
+                                <td>
                                     <button
-                                    className="btn btn-danger btn-sm"
-                                    onClick={() => handleDelete(item.id_wisata)}>
-                                    Delete
+                                        className="btn btn-danger btn-sm"
+                                        onClick={() => handleDelete(item.id_wisata)}>
+                                        Delete
                                     </button>
                                 </td>
                             </tr>
