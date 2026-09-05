@@ -24,6 +24,24 @@ db.connect(err => {
     }
 });
 
+/////////////////////// UPLOADS FOTO ///////////////////////
+const path = require('path');
+const multer = require('multer');
+
+app.use('/uploads', express.static(path.join(process.cwd(), 'uploads')));
+
+const storage = multer.diskStorage({
+    destination: (req, file, cb) => {
+        cb(null, 'uploads/');
+    },
+    filename: (req, file, cb) => {
+        const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() *1e9);
+        cb(null, uniqueSuffix + '-' + file.originalname);
+    },
+});
+
+const upload = multer({ storage: storage});
+
 //////////////////////// GET WISATA ////////////////////////
 app.get('/wisata', (req, res) => {
     const sql = 'SELECT * FROM wisata';
@@ -44,8 +62,9 @@ app.get('/wisata/:id_wisata', (req, res) => {
 });
 
 ////////////////////// POST WISATA /////////////////////////
-app.post('/wisata', (req, res) => {
+app.post('/wisata', upload.single('file'), (req, res) => {
     const { nama_wisata, deskripsi, harga_tiket, id_kategori } = req.body;
+    const nama_file = req.file ? req.file.filename : null;
 
     if (!nama_wisata || !harga_tiket) {
         return res.status(400).json({ message: 'Nama Wisata dan Harga Tiket Wajib Diisi!!' });
@@ -54,8 +73,8 @@ app.post('/wisata', (req, res) => {
         return res.status(400).json({ message: 'Deskripsi Wajib Diisi!!' });
     }
 
-    const sql = 'INSERT INTO wisata (nama_wisata, deskripsi, harga_tiket, id_kategori, tgl_input ) VALUES (?, ?, ?, ?, NOW())';
-    db.query(sql, [nama_wisata, deskripsi, harga_tiket, id_kategori], (err, result) => {
+    const sql = 'INSERT INTO wisata (nama_wisata, deskripsi, harga_tiket, nama_file, id_kategori, tgl_input) VALUES (?, ?, ?, ?, ?, NOW())';
+    db.query(sql, [nama_wisata, deskripsi, harga_tiket, nama_file, id_kategori], (err, result) => {
         if (err) return res.status(500).json({ error: err.sqlMessage });
         res.json({
             message: 'Wisata berhasil ditambahkan!',
