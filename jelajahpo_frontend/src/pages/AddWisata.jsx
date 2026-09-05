@@ -1,7 +1,8 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 
 export default function AddWIsata() {
+    const [kategori, setKategori] = useState([]);
     const [formData, setFormData] = useState({
         nama_wisata: "",
         deskripsi: "",
@@ -35,6 +36,20 @@ export default function AddWIsata() {
             alert("Terjadi kesalahan saat menambah wisata");
         }
     };
+
+    useEffect(() => {
+        const fetchKategori = async () => {
+            try {
+                const res = await fetch("http://localhost:5000/kategori");
+                const data = await res.json();
+                setKategori(data);
+            } catch (err) {
+                console.error("Gagal mengambil data kategori:", err);
+            }
+        };
+
+        fetchKategori();
+    }, []);
 
     return (
         <div className="container mt-4">
@@ -80,19 +95,34 @@ export default function AddWIsata() {
                 </div>
 
                 <div className="mb-3">
-                    <label className="form-label"> ID Kategori</label>
-                    <input
-                        type="number"
+                    <label className="form-label">Kategori</label>
+                    <select
                         name="id_kategori"
                         value={formData.id_kategori}
                         onChange={handleChange}
-                        className="form-control"
-                        placeholder="Masukkan ID kategori"
-                        required
-                    />
+                        className="form-select"
+                        required>
+                        <option value="">Pilih kategori</option>
+                        {kategori.map((item) => (
+                            <option
+                                key={item.id_kategori}
+                                value={item.id_kategori}>
+                                {item.kategori}
+                            </option>
+                        ))}
+                    </select>
                 </div>
 
-                <button type="submit" className="btn btn-success">Simpan</button>
+                <div>
+                    <button type="submit" className="btn btn-success">
+                        Simpan
+                    </button>
+                    <span className="mx-2"></span>
+                    <button type="button" className="btn btn-danger" onClick={() => navigate("/wisata")}>
+                        Batal
+                    </button>
+                </div>
+
             </form>
         </div>
     );
