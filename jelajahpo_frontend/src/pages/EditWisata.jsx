@@ -1,7 +1,9 @@
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 
-export default function AddWisata() {
+export default function EditWisata() {
+    const { id } = useParams();
+    const navigate = useNavigate();
     const [kategori, setKategori] = useState([]);
     const [formData, setFormData] = useState({
         nama_wisata: "",
@@ -9,33 +11,22 @@ export default function AddWisata() {
         harga_tiket: "",
         id_kategori: "",
     });
+    const [loading, setLoading] = useState(true);
 
-    const navigate = useNavigate();
-
-    const handleChange = (e) => {
-        setFormData({ ...formData, [e.target.name]: e.target.value });
-    }
-
-    const handleSubmit = async (e) => {
-        e.preventDefault();
-        try {
-            const res = await fetch("http://localhost:5000/wisata", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(formData),
-            });
-            if (res.ok) {
-                alert("Wisata berhasil ditambahkan!");
-                navigate("/wisata");
-            } else {
+    useEffect(() => {
+        const fetchWisata = async () => {
+            try {
+                const res = await fetch(`http://localhost:5000/wisata/${id}`);
                 const data = await res.json();
-                alert(data.message || "Gagal menambah wisata");
+                setFormData(data[0]);
+                setLoading(false);
+            } catch (err) {
+                console.error("Gagal mengambil data wisata:", err);
             }
-        } catch (err) {
-            console.error("Error:", err);
-            alert("Terjadi kesalahan saat menambah wisata");
-        }
-    };
+        };
+
+        fetchWisata();
+    }, [id]);
 
     useEffect(() => {
         const fetchKategori = async () => {
@@ -51,10 +42,30 @@ export default function AddWisata() {
         fetchKategori();
     }, []);
 
+
+    const handleChange = (e) => {
+        setFormData({ ...formData, [e.target.name]: e.target.value });
+    };
+
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+        await fetch(`http://localhost:5000/wisata/${id}`, {
+            method: "PUT",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(formData),
+        });
+        alert("Wisata berhasil diupdate!");
+        navigate("/wisata");
+    };
+
+    if (loading) {
+        return <div className="container mt-4">Loading...</div>
+    }
+
     return (
         <div className="container mt-4">
-            <h2 className="mb-3">Tambah Wisata</h2>
-            <form onSubmit={handleSubmit} className="card p-4 shadow-sm">
+            <h2>Edit Wisata</h2>
+            <form onSubmit={handleSubmit} className="mt-3">
                 <div className="mb-3">
                     <label className="form-label">Nama Wisata</label>
                     <input
@@ -63,8 +74,6 @@ export default function AddWisata() {
                         value={formData.nama_wisata}
                         onChange={handleChange}
                         className="form-control"
-                        placeholder="Masukkan nama wisata"
-                        required
                     />
                 </div>
 
@@ -76,8 +85,6 @@ export default function AddWisata() {
                         value={formData.deskripsi}
                         onChange={handleChange}
                         className="form-control"
-                        placeholder="Masukkan deskripsi wisata"
-                        required
                     />
                 </div>
 
@@ -89,8 +96,6 @@ export default function AddWisata() {
                         value={formData.harga_tiket}
                         onChange={handleChange}
                         className="form-control"
-                        placeholder="Masukkan harga tiket"
-                        required
                     />
                 </div>
 
@@ -101,7 +106,7 @@ export default function AddWisata() {
                         value={formData.id_kategori}
                         onChange={handleChange}
                         className="form-select"
-                        required>
+                    >
                         <option value="">Pilih kategori</option>
                         {kategori.map((item) => (
                             <option
@@ -125,5 +130,5 @@ export default function AddWisata() {
 
             </form>
         </div>
-    );
+    )
 }
