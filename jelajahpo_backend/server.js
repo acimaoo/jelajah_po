@@ -65,7 +65,7 @@ app.post('/wisata', (req, res) => {
 });
 
 //////////////////////// PUT WISATA /////////////////////////
-app.put('/wisata/:id_wisata', (req, res) => {
+app.put('/wisata/:id_wisata', authJWT, (req, res) => {
     const { id_wisata } = req.params;
     const { nama_wisata, deskripsi, harga_tiket, id_kategori } = req.body;
 
