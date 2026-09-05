@@ -57,7 +57,10 @@ export default function EditWisata() {
         try {
             await fetch(`http://localhost:5000/wisata/${id}`, {
                 method: "PUT",
-                headers: { "Content-Type": "application/json" },
+                headers: {
+                    "Content-Type": "application/json",
+                    Authorization: `Bearer ${localStorage.getItem("token")}`
+                },
                 body: JSON.stringify(formData),
             });
 
